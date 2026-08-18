@@ -179,6 +179,12 @@ const BANDS = [
   {id:"green",      label:"Green",       hint:"heaviest",   c:"#2f9e5f", ci:"#f0fff6"}
 ];
 const BAND_BY_ID = Object.fromEntries(BANDS.map(b=>[b.id,b]));
+const GRIPPERS = [
+  {id:"g100",label:"100 lb",hint:"lightest",c:"#6d8fb0",ci:"#0d1620"},
+  {id:"g150",label:"150 lb",hint:"",c:"#42689c",ci:"#eef4fb"},
+  {id:"g200",label:"200 lb",hint:"heaviest",c:"#26405f",ci:"#eef4fb"}
+];
+const GRIP_BY_ID = Object.fromEntries(GRIPPERS.map(g=>[g.id,g]));
 const bandNames = ids => (ids||[]).map(i=>BAND_BY_ID[i]?BAND_BY_ID[i].label:i).join(" + ");
 
 /* ============================================================
@@ -198,9 +204,9 @@ const PROGRAM = {
     {id:"tue1",name:"Bulgarian split squat",detail:"",sets:4,uni:true,reps:"6–12",mode:"load",min:[1,8],bands:true,weight:"Vest (kg)"},
     {id:"tue2",name:"Nordic curl",detail:"progress by leverage",sets:4,uni:false,reps:"6–12",mode:"load",min:[9,12],note:"Lever / assistance"},
     {id:"tue3",name:"High row",detail:"",sets:4,uni:false,reps:"12–20",mode:"reps",min:[13,16],bands:true},
-    {id:"tue4",name:"Unilateral shoulder press",detail:"",sets:4,uni:true,reps:"12–20",mode:"reps",min:[17,24],bands:true},
+    {id:"tue4",name:"Unilateral shoulder press",detail:"kept for the core demand too",sets:4,uni:true,reps:"12–20",mode:"reps",min:[17,24],bands:true},
     {id:"tue5",name:"Lateral raise",detail:"stay light",sets:4,uni:true,reps:"12–20",mode:"reps",min:[25,32],bands:true},
-    {id:"tue6",name:"Hanging leg raise",detail:"",sets:4,uni:false,reps:"12–20",mode:"reps",min:[33,36],note:"Variation"}
+    {id:"tue6",name:"Hanging leg raise",detail:"compression driver — progress toward straight legs",sets:4,uni:false,reps:"12–20",mode:"reps",min:[33,36],note:"Variation"}
   ]},
   Thursday:{ focus:"Upper B", total:32, ex:[
     {id:"thu1",name:"Pull-ups",detail:"assisted",sets:4,uni:false,reps:"6–12",mode:"load",min:[1,4],bands:true,weight:"Assist (kg)",bandRole:"assist"},
@@ -210,13 +216,16 @@ const PROGRAM = {
     {id:"thu5",name:"Biceps curl",detail:"",sets:4,uni:false,reps:"12–20",mode:"reps",min:[25,28],bands:true},
     {id:"thu6",name:"Triceps pushdown",detail:"",sets:4,uni:false,reps:"12–20",mode:"reps",min:[29,32],bands:true}
   ]},
-  Friday:{ focus:"Lower B + Shoulders", total:24, ex:[
+  Friday:{ focus:"Lower B + Shoulders + Forearms", total:40, ex:[
     {id:"fri1",name:"Band hack squat",detail:"→ belt squat once the band box is built",sets:4,uni:false,reps:"6–12",mode:"load",min:[1,4],bands:true},
-    {id:"fri2",name:"Ring leg curl",detail:"",sets:4,uni:false,reps:"12–20",mode:"reps",min:[5,8],note:"Position"},
-    {id:"fri3",name:"Band pull-apart",detail:"",sets:4,uni:false,reps:"12–20",mode:"reps",min:[9,12],bands:true},
-    {id:"fri4",name:"Overhead press",detail:"",sets:4,uni:false,reps:"12–20",mode:"reps",min:[13,16],bands:true},
+    {id:"fri10",name:"Pike push-up",detail:"handstand push-up progression — replaced the overhead press",sets:4,uni:false,reps:"6–12",mode:"load",min:[5,8],note:"Feet height / parallettes"},
+    {id:"fri2",name:"Ring leg curl",detail:"",sets:4,uni:false,reps:"12–20",mode:"reps",min:[9,12],note:"Position"},
+    {id:"fri3",name:"Band pull-apart",detail:"",sets:4,uni:false,reps:"12–20",mode:"reps",min:[13,16],bands:true},
     {id:"fri5",name:"Shrugs",detail:"",sets:4,uni:false,reps:"12–20",mode:"reps",min:[17,20],bands:true},
-    {id:"fri6",name:"Ab crunch",detail:"band from bar",sets:4,uni:false,reps:"12–20",mode:"reps",min:[21,24],bands:true}
+    {id:"fri6",name:"Ab crunch",detail:"band from bar",sets:4,uni:false,reps:"12–20",mode:"reps",min:[21,24],bands:true},
+    {id:"fri7",name:"Gripper crush",detail:"both hands inside the minute",sets:4,uni:false,dual:true,reps:"8–15",mode:"load",min:[25,28],grippers:true},
+    {id:"fri8",name:"Gripper hold + deviation",detail:"hold shut, band resists side to side",sets:4,uni:true,reps:"8–12",mode:"load",min:[29,36],grippers:true,bands:true},
+    {id:"fri9",name:"Wrist extension & flexion",detail:"pause at the end range",sets:4,uni:false,dual:true,reps:"12–20",mode:"reps",min:[37,40],bands:true}
   ]}
 };
 const DAYS=["Monday","Tuesday","Thursday","Friday"];
@@ -286,6 +295,7 @@ function fmtLoad(e,x){
   if(!e) return "–";
   if(typeof e.load==="string"&&e.load) return e.load;      // legacy entries
   const bits=[];
+  if(e.grippers&&e.grippers.length) bits.push(e.grippers.map(g=>GRIP_BY_ID[g]?GRIP_BY_ID[g].label:g).join(" + ")+" gripper");
   if(e.bands&&e.bands.length) bits.push(bandNames(e.bands)+(x&&x.bandRole==="assist"?" assist":""));
   if(e.weight!=null) bits.push(e.weight+" kg"+(x&&x.bandRole==="assist"?" assist":""));
   if(e.note) bits.push(e.note);
@@ -319,12 +329,13 @@ function dateRow(inputId,label){
    TABS
    ============================================================ */
 const wd=new Date().toLocaleDateString("en-US",{weekday:"long"});
-let active=DAYS.includes(wd)?wd:(wd==="Wednesday"?"Mobility":"Monday");
+const NEXT_DAY={Wednesday:"Thursday",Saturday:"Monday",Sunday:"Monday"};
+let active=DAYS.includes(wd)?wd:(NEXT_DAY[wd]||"Monday");
 
 function renderTabs(){
   const nav=$("#tabs"); nav.innerHTML="";
   TABS.forEach(t=>{
-    const b=el("button","tab",t==="Mobility"?"Wednesday":t);
+    const b=el("button","tab",t);
     b.setAttribute("role","tab"); b.setAttribute("aria-selected",String(t===active));
     b.onclick=()=>{active=t;renderTabs();render();window.scrollTo({top:0,behavior:"smooth"});};
     nav.appendChild(b);
@@ -334,29 +345,29 @@ function renderTabs(){
 /* ============================================================
    BAND CHIPS
    ============================================================ */
-function bandChips(x,preset){
+function chipGroup(x,kind,opts,label,preset){
+  const key=x.id+"|"+kind;
   const wrap=el("div","bandwrap");
-  wrap.appendChild(el("label","fl", x.bandRole==="assist" ? "Assistance band — tap to combine" : "Band — tap to combine"));
-  sel[x.id]=new Set(preset||[]);
+  wrap.appendChild(el("label","fl",label));
+  sel[key]=new Set(preset||[]);
   const chips=el("div","chips");
   const stack=el("div","stack");
+  const nameOf=ids=>ids.map(i=>{const o=opts.find(z=>z.id===i);return o?o.label:i;}).join(" + ");
   const paint=()=>{
-    const ids=BANDS.filter(b=>sel[x.id].has(b.id)).map(b=>b.id);
+    const ids=opts.filter(o=>sel[key].has(o.id)).map(o=>o.id);
     stack.textContent = ids.length
-      ? bandNames(ids)+(ids.length>1?` — ${ids.length} bands stacked`:"")
-      : "No band selected";
+      ? nameOf(ids)+(ids.length>1?` — ${ids.length} stacked`:"")
+      : "Nothing selected";
   };
-  BANDS.forEach(b=>{
-    const c=el("button","chip");
-    c.type="button";
+  opts.forEach(b=>{
+    const c=el("button","chip"); c.type="button";
     c.style.setProperty("--c",b.c); c.style.setProperty("--ci",b.ci);
-    c.setAttribute("aria-pressed",String(sel[x.id].has(b.id)));
+    c.setAttribute("aria-pressed",String(sel[key].has(b.id)));
     c.setAttribute("aria-label",`${b.label}${b.hint?" ("+b.hint+")":""}`);
     c.innerHTML=`<span class="sw"></span>${b.label}`;
     c.onclick=()=>{
-      if(sel[x.id].has(b.id)) sel[x.id].delete(b.id); else sel[x.id].add(b.id);
-      c.setAttribute("aria-pressed",String(sel[x.id].has(b.id)));
-      paint();
+      if(sel[key].has(b.id)) sel[key].delete(b.id); else sel[key].add(b.id);
+      c.setAttribute("aria-pressed",String(sel[key].has(b.id))); paint();
     };
     chips.appendChild(c);
   });
@@ -385,7 +396,7 @@ function renderDay(day){
     const bits=[];
     if(x.detail) bits.push(esc(x.detail));
     bits.push(`target <b>${x.reps}</b> reps`);
-    bits.push(x.uni?"4 right + 4 left":"4 sets");
+    bits.push(x.uni?"4 right + 4 left":(x.dual?"4 sets · both hands":"4 sets"));
     card.appendChild(el("p","ex-sub",bits.join(" · ")));
 
     const lad=el("div","ladder");
@@ -400,7 +411,10 @@ function renderDay(day){
       : "No history yet — this one sets the baseline."));
 
     // ---- load controls ----
-    if(x.bands) card.appendChild(bandChips(x, L&&L.e.bands ? L.e.bands : []));
+    if(x.grippers) card.appendChild(chipGroup(x,"grippers",GRIPPERS,"Gripper",L&&L.e.grippers?L.e.grippers:[]));
+    if(x.bands) card.appendChild(chipGroup(x,"bands",BANDS,
+      x.bandRole==="assist"?"Assistance band — tap to combine":"Band — tap to combine",
+      L&&L.e.bands?L.e.bands:[]));
     if(x.weight){
       const w=el("div"); w.style.marginBottom="11px";
       w.appendChild(el("label","fl",x.weight));
@@ -432,7 +446,7 @@ function renderDay(day){
       }
       box.appendChild(sg); return box;
     };
-    if(x.uni){card.appendChild(mkSets("right","Right"));card.appendChild(mkSets("left","Left"));}
+    if(x.uni||x.dual){card.appendChild(mkSets("right","Right"));card.appendChild(mkSets("left","Left"));}
     else card.appendChild(mkSets("both","Reps per set"));
 
     v.appendChild(card);
@@ -483,12 +497,14 @@ async function saveSession(day){
   const entries={}; let any=false;
   PROGRAM[day].ex.forEach(x=>{
     const e={};
-    if(x.bands){ const ids=BANDS.filter(b=>sel[x.id]&&sel[x.id].has(b.id)).map(b=>b.id);
+    if(x.bands){ const s=sel[x.id+"|bands"]; const ids=BANDS.filter(b=>s&&s.has(b.id)).map(b=>b.id);
       if(ids.length) e.bands=ids; }
+    if(x.grippers){ const s=sel[x.id+"|grippers"]; const ids=GRIPPERS.filter(b=>s&&s.has(b.id)).map(b=>b.id);
+      if(ids.length) e.grippers=ids; }
     if(x.weight){ const w=num($(`#wt-${x.id}`).value); if(w!=null) e.weight=w; }
     if(x.note){ const t=$(`#nt-${x.id}`).value.trim(); if(t) e.note=t; }
     const grab=k=>{const a=[];for(let i=0;i<x.sets;i++){const v=$(`#rp-${x.id}-${k}-${i}`);a.push(v&&v.value!==""?num(v.value):null);}return a;};
-    if(x.uni){e.right=grab("right");e.left=grab("left");} else e.both=grab("both");
+    if(x.uni||x.dual){e.right=grab("right");e.left=grab("left");} else e.both=grab("both");
     const repsFilled=[].concat(e.right||[],e.left||[],e.both||[]).some(z=>z!=null);
     if(repsFilled||e.bands||e.weight!=null||e.note){entries[x.id]=e;any=true;}
   });
@@ -514,10 +530,10 @@ const MOB=[
 function renderMobility(){
   const v=$("#view"); v.innerHTML="";
   const head=el("div","phead");
-  head.appendChild(el("h2",null,"Wednesday"));
-  head.appendChild(el("span","meta","Pike & wrist — re-test every 6–8 weeks"));
+  head.appendChild(el("h2",null,"Mobility"));
+  head.appendChild(el("span","meta","Paused — kept here for when you pick it up"));
   v.appendChild(head);
-  v.appendChild(el("p","note","Numbers from your own assessment photos. Only re-measure every six to eight weeks — week-to-week noise will just mislead you."));
+  v.appendChild(el("p","note","The Wednesday session is on hold. Wrist strength work now lives on Friday, and the hanging leg raise carries your pike compression. Numbers from your own assessment photos. Only re-measure every six to eight weeks — week-to-week noise will just mislead you."));
 
   const card=el("div","card"); card.style.marginTop="14px";
   card.appendChild(dateRow("mobDate"));
@@ -678,15 +694,16 @@ function renderData(){
   const lg=el("div","legend");
   BANDS.forEach(b=>lg.appendChild(el("span",null,`<i style="background:${b.c}"></i>${b.label}${b.hint?" — "+b.hint:""}`)));
   c4.appendChild(lg);
+  const gl=el("div","legend");
+  GRIPPERS.forEach(g=>gl.appendChild(el("span",null,`<i style="background:${g.c}"></i>${g.label}${g.hint?" — "+g.hint:""}`)));
+  c4.appendChild(gl);
+  c4.appendChild(el("p","note","Bands are stored by name, not an estimated kilogram figure — band tension depends on how far you stretch it, so a fake number would only mislead. Progress reads as: more reps on the same stack, then a heavier stack."));
   v.appendChild(c4);
 
   const c5=el("div","card");
   c5.appendChild(el("h4",null,"Install on your phone"));
-  c5.appendChild(el("p","note","<b style='color:var(--steel)'>iPhone:</b> open this page in Safari, tap Share, then Add to Home Screen.<br><b style='color:var(--steel)'>Android:</b> open in Chrome, tap the menu, then Install app or Add to Home screen.<br><br>It then opens full-screen like an app and remembers your log on this device. Data lives in this browser only — it doesn't sync between devices, so export a JSON backup now and then."));
+  c5.appendChild(el("p","note","<b style='color:var(--steel)'>iPhone:</b> open in Safari, tap Share, then Add to Home Screen.<br><b style='color:var(--steel)'>Android:</b> open in Chrome, tap the menu, then Install app.<br><br>It then opens full-screen like an app and remembers your log on this device. Data lives in this browser only, so export a JSON backup now and then."));
   v.appendChild(c5);
-  const cSink=el("div"); cSink.hidden=true;
-  cSink.appendChild(el("p","note","Bands are stored by name, not an estimated kilogram figure — band tension depends on how far you stretch it, so a fake number would only mislead. Progress reads as: more reps on the same stack, then a heavier stack."));
-  v.appendChild(c4);
 }
 function payload(){return JSON.stringify({version:2,exported:new Date().toISOString(),...DB},null,2);}
 function exportJSON(){
