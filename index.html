@@ -105,6 +105,15 @@
   .sets{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}
   .sets input{text-align:center;padding:10px 4px;font-family:"JetBrains Mono",monospace}
 
+  .setrow{display:grid;grid-template-columns:20px 58px 1fr;gap:9px;align-items:center;margin-bottom:7px}
+  .setno{font-family:"JetBrains Mono",monospace;font-size:11px;color:var(--dim);text-align:right}
+  .setrow input{text-align:center;padding:9px 4px;font-family:"JetBrains Mono",monospace}
+  .dots{display:flex;gap:6px;flex-wrap:wrap}
+  .dot{width:27px;height:27px;border-radius:50%;border:none;padding:0;cursor:pointer;
+    background:var(--c);opacity:.22;transition:opacity .12s ease}
+  .dot[aria-pressed="true"]{opacity:1;box-shadow:0 0 0 2px var(--panel),0 0 0 4px var(--coral-dim)}
+  .dot:focus-visible{outline:2px solid var(--coral);outline-offset:3px}
+  @media (prefers-reduced-motion:reduce){ .dot{transition:none} }
   .btn{font-family:"Oswald",sans-serif;letter-spacing:.09em;text-transform:uppercase;
     font-size:14px;font-weight:600;padding:13px 18px;border-radius:8px;border:none;
     background:var(--coral);color:#20140f;cursor:pointer}
@@ -192,13 +201,15 @@ const bandNames = ids => (ids||[]).map(i=>BAND_BY_ID[i]?BAND_BY_ID[i].label:i).j
    bands:true → chips · weight:"label" → kg field · note:"label" → text field
    ============================================================ */
 const PROGRAM = {
-  Monday:{ focus:"Upper A", total:28, ex:[
+  Monday:{ focus:"Upper A + Wrists", total:36, ex:[
     {id:"mon1",name:"Weighted dips",detail:"vest",sets:4,uni:false,reps:"6–12",mode:"load",min:[1,4],weight:"Vest (kg)"},
     {id:"mon2",name:"Ring inverted row",detail:"feet elevated",sets:4,uni:false,reps:"6–12",mode:"load",min:[5,8],weight:"Vest (kg)",note:"Feet height"},
     {id:"mon3",name:"Lat prayer",detail:"",sets:4,uni:false,reps:"12–20",mode:"reps",min:[9,12],bands:true},
     {id:"mon4",name:"Low press-around",detail:"",sets:4,uni:true,reps:"12–20",mode:"reps",min:[13,20],bands:true},
     {id:"mon5",name:"Ring triceps extension",detail:"impossible dip progression",sets:4,uni:false,reps:"12–20",mode:"reps",min:[21,24],note:"Ring height / body angle"},
-    {id:"mon6",name:"Hammer curl",detail:"",sets:4,uni:false,reps:"12–20",mode:"reps",min:[25,28],bands:true}
+    {id:"mon6",name:"Hammer curl",detail:"",sets:4,uni:false,reps:"12–20",mode:"reps",min:[25,28],bands:true},
+    {id:"mon7",name:"Wrist flexion & extension",detail:"forearm braced, hand past the knee — pause at the top",sets:4,uni:false,dual:true,reps:"12–20",mode:"reps",min:[29,32],bands:true},
+    {id:"mon8",name:"Wrist rotation",detail:"pronation & supination — elbow pinned to your ribs",sets:4,uni:false,dual:true,reps:"12–20",mode:"reps",min:[33,36],bands:true}
   ]},
   Tuesday:{ focus:"Lower A + Shoulders", total:36, ex:[
     {id:"tue1",name:"Bulgarian split squat",detail:"",sets:4,uni:true,reps:"6–12",mode:"load",min:[1,8],bands:true,weight:"Vest (kg)"},
@@ -216,16 +227,16 @@ const PROGRAM = {
     {id:"thu5",name:"Biceps curl",detail:"",sets:4,uni:false,reps:"12–20",mode:"reps",min:[25,28],bands:true},
     {id:"thu6",name:"Triceps pushdown",detail:"",sets:4,uni:false,reps:"12–20",mode:"reps",min:[29,32],bands:true}
   ]},
-  Friday:{ focus:"Lower B + Shoulders + Forearms", total:40, ex:[
+  Friday:{ focus:"Lower B + Shoulders + Wrists", total:36, ex:[
     {id:"fri1",name:"Band hack squat",detail:"→ belt squat once the band box is built",sets:4,uni:false,reps:"6–12",mode:"load",min:[1,4],bands:true},
-    {id:"fri10",name:"Pike push-up",detail:"handstand push-up progression — replaced the overhead press",sets:4,uni:false,reps:"6–12",mode:"load",min:[5,8],note:"Feet height / parallettes"},
+    {id:"fri10",name:"Pike push-up",detail:"handstand push-up progression — band assists",sets:4,uni:false,reps:"6–12",mode:"load",min:[5,8],bands:true,bandRole:"assist",note:"Feet height / parallettes"},
     {id:"fri2",name:"Ring leg curl",detail:"",sets:4,uni:false,reps:"12–20",mode:"reps",min:[9,12],note:"Position"},
     {id:"fri3",name:"Band pull-apart",detail:"",sets:4,uni:false,reps:"12–20",mode:"reps",min:[13,16],bands:true},
     {id:"fri5",name:"Shrugs",detail:"",sets:4,uni:false,reps:"12–20",mode:"reps",min:[17,20],bands:true},
     {id:"fri6",name:"Ab crunch",detail:"band from bar",sets:4,uni:false,reps:"12–20",mode:"reps",min:[21,24],bands:true},
-    {id:"fri7",name:"Gripper crush",detail:"both hands inside the minute",sets:4,uni:false,dual:true,reps:"8–15",mode:"load",min:[25,28],grippers:true},
-    {id:"fri8",name:"Gripper hold + deviation",detail:"hold shut, band resists side to side",sets:4,uni:true,reps:"8–12",mode:"load",min:[29,36],grippers:true,bands:true},
-    {id:"fri9",name:"Wrist extension & flexion",detail:"pause at the end range",sets:4,uni:false,dual:true,reps:"12–20",mode:"reps",min:[37,40],bands:true}
+    {id:"fri11",name:"Wrist load progression",detail:"fingers forward on the floor — rock weight over the hands",sets:4,uni:false,reps:"8–12",mode:"load",min:[25,28],note:"Stage 1–5"},
+    {id:"fri8",name:"Gripper hold + deviation",detail:"gripper shut, fist wipes thumb-ward and pinky-ward",sets:4,uni:false,dual:true,reps:"8–12",mode:"load",min:[29,32],grippers:true,bands:true},
+    {id:"fri9",name:"Wrist flexion & extension",detail:"pause at the end range",sets:4,uni:false,dual:true,reps:"12–20",mode:"reps",min:[33,36],bands:true}
   ]}
 };
 const DAYS=["Monday","Tuesday","Thursday","Friday"];
@@ -235,9 +246,11 @@ const TABS=[...DAYS,"Mobility","Body","Data"];
    STORAGE
    ============================================================ */
 const KEY="attic:trainingLog:v1";
-let DB={sessions:[],body:[],mobility:[]};
+let DB={sessions:[],body:[],mobility:[],drafts:{}};
 let canPersist=false;
-let sel={};                       // exerciseId -> Set of band ids (current form state)
+let sel={};                 // "exerciseId|kind" -> Set of selected chip ids
+let currentDay=null;        // day whose form is on screen
+let draftTimer=null;        // debounce for autosave
 
 const ARTIFACT_STORE = !!(window.storage && window.storage.set);
 function localWritable(){
@@ -258,7 +271,7 @@ async function loadAll(){
   try{
     const raw = await readRaw();
     if(raw){ const p=JSON.parse(raw);
-      DB={sessions:p.sessions||[],body:p.body||[],mobility:p.mobility||[]}; }
+      DB={sessions:p.sessions||[],body:p.body||[],mobility:p.mobility||[],drafts:p.drafts||{}}; }
     setStatus(true,summaryLine());
   }catch(e){ setStatus(true,"New log — nothing recorded yet"); }
 }
@@ -291,11 +304,21 @@ function lastFor(day,exId){
   const p=DB.sessions.filter(s=>s.day===day&&s.entries&&s.entries[exId]).sort((a,b)=>b.date.localeCompare(a.date));
   return p.length?{date:p[0].date,e:p[0].entries[exId]}:null;
 }
+function summarizeBandSets(bs){
+  const flat=[];
+  ["both","right","left"].forEach(k=>{ if(bs[k]) bs[k].forEach(a=>{ if(a&&a.length) flat.push(bandNames(a)); }); });
+  if(!flat.length) return "";
+  const uniq=[...new Set(flat)];
+  if(uniq.length===1) return uniq[0];
+  const counts={}; flat.forEach(n=>counts[n]=(counts[n]||0)+1);
+  return Object.entries(counts).map(([n,c])=>`${n} ×${c}`).join(", ");
+}
 function fmtLoad(e,x){
   if(!e) return "–";
   if(typeof e.load==="string"&&e.load) return e.load;      // legacy entries
   const bits=[];
   if(e.grippers&&e.grippers.length) bits.push(e.grippers.map(g=>GRIP_BY_ID[g]?GRIP_BY_ID[g].label:g).join(" + ")+" gripper");
+  if(e.bandSets){ const s=summarizeBandSets(e.bandSets); if(s) bits.push(s+(x&&x.bandRole==="assist"?" assist":"")); }
   if(e.bands&&e.bands.length) bits.push(bandNames(e.bands)+(x&&x.bandRole==="assist"?" assist":""));
   if(e.weight!=null) bits.push(e.weight+" kg"+(x&&x.bandRole==="assist"?" assist":""));
   if(e.note) bits.push(e.note);
@@ -337,7 +360,11 @@ function renderTabs(){
   TABS.forEach(t=>{
     const b=el("button","tab",t);
     b.setAttribute("role","tab"); b.setAttribute("aria-selected",String(t===active));
-    b.onclick=()=>{active=t;renderTabs();render();window.scrollTo({top:0,behavior:"smooth"});};
+    b.onclick=()=>{
+      if(currentDay&&DAYS.includes(active)){clearTimeout(draftTimer);saveDraft(currentDay);}
+      if(!DAYS.includes(t)) currentDay=null;
+      active=t;renderTabs();render();window.scrollTo({top:0,behavior:"smooth"});
+    };
     nav.appendChild(b);
   });
 }
@@ -367,7 +394,7 @@ function chipGroup(x,kind,opts,label,preset){
     c.innerHTML=`<span class="sw"></span>${b.label}`;
     c.onclick=()=>{
       if(sel[key].has(b.id)) sel[key].delete(b.id); else sel[key].add(b.id);
-      c.setAttribute("aria-pressed",String(sel[key].has(b.id))); paint();
+      c.setAttribute("aria-pressed",String(sel[key].has(b.id))); paint(); markDirty();
     };
     chips.appendChild(c);
   });
@@ -376,17 +403,83 @@ function chipGroup(x,kind,opts,label,preset){
 }
 
 /* ============================================================
+   DRAFT AUTOSAVE — keeps unsaved typing across a browser close
+   ============================================================ */
+function markDirty(){
+  if(!currentDay) return;
+  const d=document.getElementById("draftNote");
+  if(d) d.textContent="Saving…";
+  clearTimeout(draftTimer);
+  draftTimer=setTimeout(()=>saveDraft(currentDay),400);
+}
+function collectDay(day,keepEmpty){
+  const entries={}; let any=false;
+  PROGRAM[day].ex.forEach(x=>{
+    const e={};
+    if(x.bands){
+      const keys=(x.uni||x.dual)?["right","left"]:["both"];
+      const bs={}; let anyBand=false;
+      keys.forEach(k=>{
+        bs[k]=[];
+        for(let i=0;i<x.sets;i++){
+          const s=sel[`${x.id}|bs|${k}|${i}`];
+          const ids=s?BANDS.filter(b=>s.has(b.id)).map(b=>b.id):[];
+          if(ids.length) anyBand=true;
+          bs[k].push(ids);
+        }
+      });
+      if(anyBand) e.bandSets=bs;
+    }
+    if(x.grippers){const s=sel[x.id+"|grippers"];const ids=GRIPPERS.filter(b=>s&&s.has(b.id)).map(b=>b.id); if(ids.length)e.grippers=ids;}
+    if(x.weight){const n=$(`#wt-${x.id}`); const w=n?num(n.value):null; if(w!=null)e.weight=w;}
+    if(x.note){const n=$(`#nt-${x.id}`); const t=n?n.value.trim():""; if(t)e.note=t;}
+    const grab=k=>{const a=[];for(let i=0;i<x.sets;i++){const v=$(`#rp-${x.id}-${k}-${i}`);a.push(v&&v.value!==""?num(v.value):null);}return a;};
+    if(x.uni||x.dual){e.right=grab("right");e.left=grab("left");} else e.both=grab("both");
+    const filled=[].concat(e.right||[],e.left||[],e.both||[]).some(z=>z!=null)||e.bands||e.bandSets||e.grippers||e.weight!=null||e.note;
+    if(filled){entries[x.id]=e;any=true;} else if(keepEmpty){entries[x.id]=e;}
+  });
+  return {entries,any};
+}
+async function saveDraft(day){
+  const dEl=$("#sessDate"); if(!dEl) return;
+  const nEl=$("#sessNotes");
+  const {entries,any}=collectDay(day,false);
+  DB.drafts=DB.drafts||{};
+  if(!any && !(nEl&&nEl.value.trim())){ delete DB.drafts[day]; }
+  else DB.drafts[day]={date:dEl.value||today(),notes:nEl?nEl.value:"",entries,at:Date.now()};
+  await persist();
+  const nd=document.getElementById("draftNote");
+  if(nd) nd.textContent = DB.drafts[day] ? "Draft saved — safe to close the app" : "";
+}
+
+/* ============================================================
    TRAINING DAY
    ============================================================ */
 function renderDay(day){
-  const P=PROGRAM[day],v=$("#view"); v.innerHTML=""; sel={};
+  const P=PROGRAM[day],v=$("#view"); v.innerHTML=""; sel={}; currentDay=day;
+  const DR=(DB.drafts&&DB.drafts[day])||null;
   const head=el("div","phead");
   head.appendChild(el("h2",null,day));
   head.appendChild(el("span","meta",`${P.focus} · ${P.total} intervals · ${P.total} min`));
   v.appendChild(head);
-  v.appendChild(dateRow("sessDate"));
+  const drow=dateRow("sessDate");
+  v.appendChild(drow);
+  if(DR) $("#sessDate").value=DR.date||today();
+  $("#sessDate").oninput=markDirty;
+
+  const dn=el("p","last"); dn.id="draftNote"; dn.style.margin="-8px 0 14px";
+  dn.textContent=DR?"Draft restored — carry on where you left off":"";
+  v.appendChild(dn);
+  if(DR){
+    const disc=el("button","btn ghost sm","Discard draft");
+    disc.style.margin="0 0 16px";
+    disc.onclick=async()=>{ if(!confirm("Discard the unsaved draft for "+day+"?"))return;
+      delete DB.drafts[day]; await persist(); render(); toast("Draft discarded"); };
+    v.appendChild(disc);
+  }
 
   P.ex.forEach(x=>{
+    const de=DR&&DR.entries?DR.entries[x.id]:null;
     const card=el("div","ex");
     const h=el("div","ex-h");
     h.appendChild(el("h3",null,esc(x.name)));
@@ -411,23 +504,27 @@ function renderDay(day){
       : "No history yet — this one sets the baseline."));
 
     // ---- load controls ----
-    if(x.grippers) card.appendChild(chipGroup(x,"grippers",GRIPPERS,"Gripper",L&&L.e.grippers?L.e.grippers:[]));
-    if(x.bands) card.appendChild(chipGroup(x,"bands",BANDS,
-      x.bandRole==="assist"?"Assistance band — tap to combine":"Band — tap to combine",
-      L&&L.e.bands?L.e.bands:[]));
+    if(x.grippers) card.appendChild(chipGroup(x,"grippers",GRIPPERS,"Gripper",
+      de&&de.grippers?de.grippers:(L&&L.e.grippers?L.e.grippers:[])));
+    if(x.bands) card.appendChild(el("p","ex-sub",
+      x.bandRole==="assist"?"Assistance band per set — tap the colours":"Band per set — tap the colours"));
     if(x.weight){
       const w=el("div"); w.style.marginBottom="11px";
       w.appendChild(el("label","fl",x.weight));
       const i=el("input"); i.id=`wt-${x.id}`; i.type="number"; i.inputMode="decimal"; i.step="0.5";
       i.placeholder="0";
-      if(L&&L.e.weight!=null) i.value=L.e.weight;
+      if(de&&de.weight!=null) i.value=de.weight;
+      else if(L&&L.e.weight!=null) i.value=L.e.weight;
+      i.oninput=markDirty;
       w.appendChild(i); card.appendChild(w);
     }
     if(x.note){
       const w=el("div"); w.style.marginBottom="11px";
       w.appendChild(el("label","fl",x.note));
       const i=el("input"); i.id=`nt-${x.id}`; i.placeholder="—";
-      if(L&&L.e.note) i.value=L.e.note;
+      if(de&&de.note) i.value=de.note;
+      else if(L&&L.e.note) i.value=L.e.note;
+      i.oninput=markDirty;
       w.appendChild(i); card.appendChild(w);
     }
 
@@ -435,19 +532,77 @@ function renderDay(day){
     const mkSets=(k,label)=>{
       const box=el("div","side");
       if(label) box.appendChild(el("div","sl",label));
-      const sg=el("div","sets");
-      for(let i=0;i<x.sets;i++){
-        const inp=el("input"); inp.type="number"; inp.inputMode="numeric"; inp.min="0";
-        inp.id=`rp-${x.id}-${k}-${i}`;
-        inp.setAttribute("aria-label",`${x.name} ${label||"set"} ${i+1} reps`);
-        const prev=L&&L.e[k]&&L.e[k][i];
-        inp.placeholder=(prev!=null&&prev!=="")?prev:"–";
-        sg.appendChild(inp);
+      if(x.bands){
+        for(let i=0;i<x.sets;i++){
+          const row=el("div","setrow");
+          row.appendChild(el("span","setno",String(i+1)));
+          const inp=el("input"); inp.type="number"; inp.inputMode="numeric"; inp.min="0";
+          inp.id=`rp-${x.id}-${k}-${i}`;
+          inp.setAttribute("aria-label",`${x.name} ${label||"set"} ${i+1} reps`);
+          const prev=L&&L.e[k]&&L.e[k][i];
+          inp.placeholder=(prev!=null&&prev!=="")?prev:"–";
+          const dv=de&&de[k]&&de[k][i];
+          if(dv!=null&&dv!=="") inp.value=dv;
+          inp.oninput=markDirty;
+          row.appendChild(inp);
+          const key=`${x.id}|bs|${k}|${i}`;
+          const pre=(de&&de.bandSets&&de.bandSets[k]&&de.bandSets[k][i])
+                 || (L&&L.e.bandSets&&L.e.bandSets[k]&&L.e.bandSets[k][i]) || [];
+          sel[key]=new Set(pre);
+          const dots=el("div","dots");
+          BANDS.forEach(b=>{
+            const d=el("button","dot"); d.type="button";
+            d.style.setProperty("--c",b.c);
+            d.dataset.k=key; d.dataset.b=b.id;
+            d.title=b.label;
+            d.setAttribute("aria-label",`${b.label}, set ${i+1}`);
+            d.setAttribute("aria-pressed",String(sel[key].has(b.id)));
+            d.onclick=()=>{
+              if(sel[key].has(b.id)) sel[key].delete(b.id); else sel[key].add(b.id);
+              d.setAttribute("aria-pressed",String(sel[key].has(b.id))); markDirty();
+            };
+            dots.appendChild(d);
+          });
+          row.appendChild(dots);
+          box.appendChild(row);
+        }
+      } else {
+        const sg=el("div","sets");
+        for(let i=0;i<x.sets;i++){
+          const inp=el("input"); inp.type="number"; inp.inputMode="numeric"; inp.min="0";
+          inp.id=`rp-${x.id}-${k}-${i}`;
+          inp.setAttribute("aria-label",`${x.name} ${label||"set"} ${i+1} reps`);
+          const prev=L&&L.e[k]&&L.e[k][i];
+          inp.placeholder=(prev!=null&&prev!=="")?prev:"–";
+          const dv=de&&de[k]&&de[k][i];
+          if(dv!=null&&dv!=="") inp.value=dv;
+          inp.oninput=markDirty;
+          sg.appendChild(inp);
+        }
+        box.appendChild(sg);
       }
-      box.appendChild(sg); return box;
+      return box;
     };
     if(x.uni||x.dual){card.appendChild(mkSets("right","Right"));card.appendChild(mkSets("left","Left"));}
     else card.appendChild(mkSets("both","Reps per set"));
+    if(x.bands){
+      const cp=el("button","btn ghost sm","Copy set 1 bands to all");
+      cp.style.marginTop="4px";
+      cp.onclick=()=>{
+        const keys=(x.uni||x.dual)?["right","left"]:["both"];
+        const src=new Set(sel[`${x.id}|bs|${keys[0]}|0`]||[]);
+        keys.forEach(k=>{
+          for(let i=0;i<x.sets;i++){
+            const key=`${x.id}|bs|${k}|${i}`;
+            sel[key]=new Set(src);
+            document.querySelectorAll('[data-k="'+key+'"]').forEach(btn=>
+              btn.setAttribute("aria-pressed",String(sel[key].has(btn.dataset.b))));
+          }
+        });
+        markDirty(); toast("Bands copied to all sets");
+      };
+      card.appendChild(cp);
+    }
 
     v.appendChild(card);
   });
@@ -456,6 +611,8 @@ function renderDay(day){
   nw.appendChild(el("label","fl","Session notes"));
   const ta=el("textarea"); ta.id="sessNotes"; ta.rows=3;
   ta.placeholder="How it felt, wrist niggles, what to load next week…";
+  if(DR&&DR.notes) ta.value=DR.notes;
+  ta.oninput=markDirty;
   nw.appendChild(ta); v.appendChild(nw);
 
   const br=el("div","btn-row");
@@ -493,23 +650,12 @@ function renderDay(day){
 }
 
 async function saveSession(day){
+  clearTimeout(draftTimer);
   const date=$("#sessDate").value||today();
-  const entries={}; let any=false;
-  PROGRAM[day].ex.forEach(x=>{
-    const e={};
-    if(x.bands){ const s=sel[x.id+"|bands"]; const ids=BANDS.filter(b=>s&&s.has(b.id)).map(b=>b.id);
-      if(ids.length) e.bands=ids; }
-    if(x.grippers){ const s=sel[x.id+"|grippers"]; const ids=GRIPPERS.filter(b=>s&&s.has(b.id)).map(b=>b.id);
-      if(ids.length) e.grippers=ids; }
-    if(x.weight){ const w=num($(`#wt-${x.id}`).value); if(w!=null) e.weight=w; }
-    if(x.note){ const t=$(`#nt-${x.id}`).value.trim(); if(t) e.note=t; }
-    const grab=k=>{const a=[];for(let i=0;i<x.sets;i++){const v=$(`#rp-${x.id}-${k}-${i}`);a.push(v&&v.value!==""?num(v.value):null);}return a;};
-    if(x.uni||x.dual){e.right=grab("right");e.left=grab("left");} else e.both=grab("both");
-    const repsFilled=[].concat(e.right||[],e.left||[],e.both||[]).some(z=>z!=null);
-    if(repsFilled||e.bands||e.weight!=null||e.note){entries[x.id]=e;any=true;}
-  });
+  const {entries,any}=collectDay(day,false);
   if(!any){toast("Nothing to save yet — pick a band or log some reps");return;}
   DB.sessions.push({id:"s"+Date.now(),day,date,entries,notes:$("#sessNotes").value.trim()});
+  if(DB.drafts) delete DB.drafts[day];
   const ok=await persist(); render();
   toast(ok?"Session saved":"Saved for this visit — export to keep it");
 }
@@ -686,7 +832,7 @@ function renderData(){
   const br3=el("div","btn-row");
   const d=el("button","btn danger","Clear all data");
   d.onclick=async()=>{if(!confirm("Delete all logged data? Export first if you want to keep it."))return;
-    DB={sessions:[],body:[],mobility:[]};await persist();render();toast("All data cleared");};
+    DB={sessions:[],body:[],mobility:[],drafts:{}};await persist();render();toast("All data cleared");};
   br3.appendChild(d); c3.appendChild(br3); v.appendChild(c3);
 
   const c4=el("div","card");
@@ -702,7 +848,7 @@ function renderData(){
 
   const c5=el("div","card");
   c5.appendChild(el("h4",null,"Install on your phone"));
-  c5.appendChild(el("p","note","<b style='color:var(--steel)'>iPhone:</b> open in Safari, tap Share, then Add to Home Screen.<br><b style='color:var(--steel)'>Android:</b> open in Chrome, tap the menu, then Install app.<br><br>It then opens full-screen like an app and remembers your log on this device. Data lives in this browser only, so export a JSON backup now and then."));
+  c5.appendChild(el("p","note","<b style='color:var(--steel)'>iPhone:</b> open in Safari, tap Share, then Add to Home Screen.<br><b style='color:var(--steel)'>Android:</b> open in Chrome, tap the menu, then Install app.<br><br>Typing is saved as a draft as you go, so closing mid-session loses nothing. Export a JSON backup now and then."));
   v.appendChild(c5);
 }
 function payload(){return JSON.stringify({version:2,exported:new Date().toISOString(),...DB},null,2);}
