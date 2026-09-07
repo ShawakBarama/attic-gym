@@ -114,6 +114,11 @@
   .dot[aria-pressed="true"]{opacity:1;box-shadow:0 0 0 2px var(--panel),0 0 0 4px var(--coral-dim)}
   .dot:focus-visible{outline:2px solid var(--coral);outline-offset:3px}
   @media (prefers-reduced-motion:reduce){ .dot{transition:none} }
+  .prow{display:grid;gap:7px;align-items:center;margin-bottom:7px}
+  .prow input{text-align:center;padding:9px 4px;font-family:"JetBrains Mono",monospace}
+  .phdr{margin-bottom:3px}
+  .hl{font-family:"Oswald",sans-serif;font-size:10px;letter-spacing:.12em;
+    text-transform:uppercase;color:var(--dim);text-align:center}
   .btn{font-family:"Oswald",sans-serif;letter-spacing:.09em;text-transform:uppercase;
     font-size:14px;font-weight:600;padding:13px 18px;border-radius:8px;border:none;
     background:var(--coral);color:#20140f;cursor:pointer}
@@ -208,7 +213,7 @@ const PROGRAM = {
     {id:"mon4",name:"Low press-around",detail:"",sets:4,uni:true,reps:"12–20",mode:"reps",min:[13,20],bands:true},
     {id:"mon5",name:"Ring triceps extension",detail:"impossible dip progression",sets:4,uni:false,reps:"12–20",mode:"reps",min:[21,24],note:"Ring height / body angle"},
     {id:"mon6",name:"Hammer curl",detail:"",sets:4,uni:false,reps:"12–20",mode:"reps",min:[25,28],bands:true},
-    {id:"mon7",name:"Wrist flexion & extension",detail:"forearm braced, hand past the knee — pause at the top",sets:4,uni:false,dual:true,reps:"12–20",mode:"reps",min:[29,32],bands:true},
+    {id:"mon7",name:"Wrist flexion & extension",detail:"both hands together, like a barbell — pause at the top",sets:4,uni:false,reps:"12–20",mode:"reps",min:[29,32],bands:true},
     {id:"mon8",name:"Wrist rotation",detail:"pronation & supination — elbow pinned to your ribs",sets:4,uni:false,dual:true,reps:"12–20",mode:"reps",min:[33,36],bands:true}
   ]},
   Tuesday:{ focus:"Lower A + Shoulders", total:36, ex:[
@@ -228,7 +233,7 @@ const PROGRAM = {
     {id:"thu6",name:"Triceps pushdown",detail:"",sets:4,uni:false,reps:"12–20",mode:"reps",min:[29,32],bands:true}
   ]},
   Friday:{ focus:"Lower B + Shoulders + Wrists", total:36, ex:[
-    {id:"fri1",name:"Band hack squat",detail:"→ belt squat once the band box is built",sets:4,uni:false,reps:"6–12",mode:"load",min:[1,4],bands:true},
+    {id:"fri12",name:"Pistol squat",detail:"ring-assisted → box → heel-elevated → full → weighted",sets:4,uni:false,dual:true,reps:"5–8",mode:"load",min:[1,4],note:"Stage 1–5 / ring assistance",weight:"Vest (kg)"},
     {id:"fri10",name:"Pike push-up",detail:"handstand push-up progression — band assists",sets:4,uni:false,reps:"6–12",mode:"load",min:[5,8],bands:true,bandRole:"assist",note:"Feet height / parallettes"},
     {id:"fri2",name:"Ring leg curl",detail:"",sets:4,uni:false,reps:"12–20",mode:"reps",min:[9,12],note:"Position"},
     {id:"fri3",name:"Band pull-apart",detail:"",sets:4,uni:false,reps:"12–20",mode:"reps",min:[13,16],bands:true},
@@ -236,7 +241,7 @@ const PROGRAM = {
     {id:"fri6",name:"Ab crunch",detail:"band from bar",sets:4,uni:false,reps:"12–20",mode:"reps",min:[21,24],bands:true},
     {id:"fri11",name:"Wrist load progression",detail:"fingers forward on the floor — rock weight over the hands",sets:4,uni:false,reps:"8–12",mode:"load",min:[25,28],note:"Stage 1–5"},
     {id:"fri8",name:"Gripper hold + deviation",detail:"gripper shut, fist wipes thumb-ward and pinky-ward",sets:4,uni:false,dual:true,reps:"8–12",mode:"load",min:[29,32],grippers:true,bands:true},
-    {id:"fri9",name:"Wrist flexion & extension",detail:"pause at the end range",sets:4,uni:false,dual:true,reps:"12–20",mode:"reps",min:[33,36],bands:true}
+    {id:"fri9",name:"Wrist flexion & extension",detail:"both hands together — pause at the end range",sets:4,uni:false,reps:"12–20",mode:"reps",min:[33,36],bands:true}
   ]}
 };
 const DAYS=["Monday","Tuesday","Thursday","Friday"];
@@ -417,7 +422,7 @@ function collectDay(day,keepEmpty){
   PROGRAM[day].ex.forEach(x=>{
     const e={};
     if(x.bands){
-      const keys=(x.uni||x.dual)?["right","left"]:["both"];
+      const keys=x.uni?["right","left"]:["both"];
       const bs={}; let anyBand=false;
       keys.forEach(k=>{
         bs[k]=[];
@@ -489,7 +494,7 @@ function renderDay(day){
     const bits=[];
     if(x.detail) bits.push(esc(x.detail));
     bits.push(`target <b>${x.reps}</b> reps`);
-    bits.push(x.uni?"4 right + 4 left":(x.dual?"4 sets · both hands":"4 sets"));
+    bits.push(x.uni?"4 right + 4 left":(x.dual?"4 sets · both sides in the minute":"4 sets"));
     card.appendChild(el("p","ex-sub",bits.join(" · ")));
 
     const lad=el("div","ladder");
@@ -529,67 +534,87 @@ function renderDay(day){
     }
 
     // ---- reps ----
-    const mkSets=(k,label)=>{
+    const mkRepInput=(k,i)=>{
+      const inp=el("input"); inp.type="number"; inp.inputMode="numeric"; inp.min="0";
+      inp.id=`rp-${x.id}-${k}-${i}`;
+      inp.setAttribute("aria-label",`${x.name}, ${k} side, set ${i+1} reps`);
+      const prev=L&&L.e[k]&&L.e[k][i];
+      inp.placeholder=(prev!=null&&prev!=="")?prev:"–";
+      const dv=de&&de[k]&&de[k][i];
+      if(dv!=null&&dv!=="") inp.value=dv;
+      inp.oninput=markDirty;
+      return inp;
+    };
+    const mkDots=(k,i)=>{
+      const key=`${x.id}|bs|${k}|${i}`;
+      const pre=(de&&de.bandSets&&de.bandSets[k]&&de.bandSets[k][i])
+             || (L&&L.e.bandSets&&L.e.bandSets[k]&&L.e.bandSets[k][i]) || [];
+      sel[key]=new Set(pre);
+      const dots=el("div","dots");
+      BANDS.forEach(b=>{
+        const d=el("button","dot"); d.type="button";
+        d.style.setProperty("--c",b.c);
+        d.dataset.k=key; d.dataset.b=b.id; d.title=b.label;
+        d.setAttribute("aria-label",`${b.label}, set ${i+1}`);
+        d.setAttribute("aria-pressed",String(sel[key].has(b.id)));
+        d.onclick=()=>{
+          if(sel[key].has(b.id)) sel[key].delete(b.id); else sel[key].add(b.id);
+          d.setAttribute("aria-pressed",String(sel[key].has(b.id))); markDirty();
+        };
+        dots.appendChild(d);
+      });
+      return dots;
+    };
+    const plainRows=(k,label)=>{
       const box=el("div","side");
       if(label) box.appendChild(el("div","sl",label));
       if(x.bands){
         for(let i=0;i<x.sets;i++){
           const row=el("div","setrow");
           row.appendChild(el("span","setno",String(i+1)));
-          const inp=el("input"); inp.type="number"; inp.inputMode="numeric"; inp.min="0";
-          inp.id=`rp-${x.id}-${k}-${i}`;
-          inp.setAttribute("aria-label",`${x.name} ${label||"set"} ${i+1} reps`);
-          const prev=L&&L.e[k]&&L.e[k][i];
-          inp.placeholder=(prev!=null&&prev!=="")?prev:"–";
-          const dv=de&&de[k]&&de[k][i];
-          if(dv!=null&&dv!=="") inp.value=dv;
-          inp.oninput=markDirty;
-          row.appendChild(inp);
-          const key=`${x.id}|bs|${k}|${i}`;
-          const pre=(de&&de.bandSets&&de.bandSets[k]&&de.bandSets[k][i])
-                 || (L&&L.e.bandSets&&L.e.bandSets[k]&&L.e.bandSets[k][i]) || [];
-          sel[key]=new Set(pre);
-          const dots=el("div","dots");
-          BANDS.forEach(b=>{
-            const d=el("button","dot"); d.type="button";
-            d.style.setProperty("--c",b.c);
-            d.dataset.k=key; d.dataset.b=b.id;
-            d.title=b.label;
-            d.setAttribute("aria-label",`${b.label}, set ${i+1}`);
-            d.setAttribute("aria-pressed",String(sel[key].has(b.id)));
-            d.onclick=()=>{
-              if(sel[key].has(b.id)) sel[key].delete(b.id); else sel[key].add(b.id);
-              d.setAttribute("aria-pressed",String(sel[key].has(b.id))); markDirty();
-            };
-            dots.appendChild(d);
-          });
-          row.appendChild(dots);
+          row.appendChild(mkRepInput(k,i));
+          row.appendChild(mkDots(k,i));
           box.appendChild(row);
         }
       } else {
         const sg=el("div","sets");
-        for(let i=0;i<x.sets;i++){
-          const inp=el("input"); inp.type="number"; inp.inputMode="numeric"; inp.min="0";
-          inp.id=`rp-${x.id}-${k}-${i}`;
-          inp.setAttribute("aria-label",`${x.name} ${label||"set"} ${i+1} reps`);
-          const prev=L&&L.e[k]&&L.e[k][i];
-          inp.placeholder=(prev!=null&&prev!=="")?prev:"–";
-          const dv=de&&de[k]&&de[k][i];
-          if(dv!=null&&dv!=="") inp.value=dv;
-          inp.oninput=markDirty;
-          sg.appendChild(inp);
-        }
+        for(let i=0;i<x.sets;i++) sg.appendChild(mkRepInput(k,i));
         box.appendChild(sg);
       }
       return box;
     };
-    if(x.uni||x.dual){card.appendChild(mkSets("right","Right"));card.appendChild(mkSets("left","Left"));}
-    else card.appendChild(mkSets("both","Reps per set"));
+
+    if(x.dual){
+      // both sides inside the same minute — right and left side by side
+      const box=el("div","side");
+      const cols=x.bands?"18px 46px 46px 1fr":"18px 1fr 1fr";
+      const hdr=el("div","prow phdr"); hdr.style.gridTemplateColumns=cols;
+      hdr.appendChild(el("span","setno",""));
+      hdr.appendChild(el("span","hl",x.name.indexOf("Pistol")===0?"L leg":"R"));
+      hdr.appendChild(el("span","hl",x.name.indexOf("Pistol")===0?"R leg":"L"));
+      if(x.bands) hdr.appendChild(el("span","hl","Band"));
+      box.appendChild(hdr);
+      for(let i=0;i<x.sets;i++){
+        const row=el("div","prow"); row.style.gridTemplateColumns=cols;
+        row.appendChild(el("span","setno",String(i+1)));
+        row.appendChild(mkRepInput("right",i));
+        row.appendChild(mkRepInput("left",i));
+        if(x.bands) row.appendChild(mkDots("both",i));
+        box.appendChild(row);
+      }
+      card.appendChild(box);
+    } else if(x.uni){
+      card.appendChild(plainRows("right","Right"));
+      card.appendChild(plainRows("left","Left"));
+    } else {
+      card.appendChild(plainRows("both","Reps per set"));
+    }
+
     if(x.bands){
       const cp=el("button","btn ghost sm","Copy set 1 bands to all");
       cp.style.marginTop="4px";
       cp.onclick=()=>{
-        const keys=(x.uni||x.dual)?["right","left"]:["both"];
+        const keys=x.uni?["right","left"]:["both"];
         const src=new Set(sel[`${x.id}|bs|${keys[0]}|0`]||[]);
         keys.forEach(k=>{
           for(let i=0;i<x.sets;i++){
