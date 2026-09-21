@@ -113,6 +113,9 @@
     background:var(--c);opacity:.22;transition:opacity .12s ease}
   .dot[aria-pressed="true"]{opacity:1;box-shadow:0 0 0 2px var(--panel),0 0 0 4px var(--coral-dim)}
   .dot:focus-visible{outline:2px solid var(--coral);outline-offset:3px}
+  .dot.short{box-shadow:inset 0 0 0 4px rgba(12,17,24,.62)}
+  .dot.short[aria-pressed="true"]{box-shadow:inset 0 0 0 4px rgba(12,17,24,.62),
+    0 0 0 2px var(--panel),0 0 0 4px var(--coral-dim)}
   @media (prefers-reduced-motion:reduce){ .dot{transition:none} }
   .prow{display:grid;gap:7px;align-items:center;margin-bottom:7px}
   .prow input{text-align:center;padding:9px 4px;font-family:"JetBrains Mono",monospace}
@@ -190,7 +193,9 @@ const BANDS = [
   {id:"light-black",label:"Light black", hint:"",           c:"#5c6672", ci:"#f2f5f8"},
   {id:"heavy-black",label:"Heavy black", hint:"",           c:"#262c35", ci:"#e7ecf2"},
   {id:"purple",     label:"Purple",      hint:"",           c:"#8763c4", ci:"#f6f2ff"},
-  {id:"green",      label:"Green",       hint:"heaviest",   c:"#2f9e5f", ci:"#f0fff6"}
+  {id:"green",      label:"Green",       hint:"",           c:"#2f9e5f", ci:"#f0fff6"},
+  {id:"purple-short",label:"Purple short",hint:"short/tight",c:"#6a45ab", ci:"#f6f2ff", short:true},
+  {id:"green-short", label:"Green short", hint:"heaviest",   c:"#1f7a46", ci:"#f0fff6", short:true}
 ];
 const BAND_BY_ID = Object.fromEntries(BANDS.map(b=>[b.id,b]));
 const GRIPPERS = [
@@ -199,6 +204,13 @@ const GRIPPERS = [
   {id:"g200",label:"200 lb",hint:"heaviest",c:"#26405f",ci:"#eef4fb"}
 ];
 const GRIP_BY_ID = Object.fromEntries(GRIPPERS.map(g=>[g.id,g]));
+const HANDPOS = [
+  {id:"hip",   label:"By hip",   hint:"easiest", c:"#6d8fb0", ci:"#0d1620"},
+  {id:"thigh", label:"Mid-thigh",hint:"",        c:"#52779f", ci:"#eef4fb"},
+  {id:"knee",  label:"Knee",     hint:"",        c:"#3a5c88", ci:"#eef4fb"},
+  {id:"shin",  label:"Shin",     hint:"hardest", c:"#26405f", ci:"#eef4fb"}
+];
+const HP_BY_ID = Object.fromEntries(HANDPOS.map(p=>[p.id,p]));
 const bandNames = ids => (ids||[]).map(i=>BAND_BY_ID[i]?BAND_BY_ID[i].label:i).join(" + ");
 
 /* ============================================================
@@ -213,7 +225,7 @@ const PROGRAM = {
     {id:"mon4",name:"Low press-around",detail:"",sets:4,uni:true,reps:"12–20",mode:"reps",min:[13,20],bands:true},
     {id:"mon5",name:"Ring triceps extension",detail:"impossible dip progression",sets:4,uni:false,reps:"12–20",mode:"reps",min:[21,24],note:"Ring height / body angle"},
     {id:"mon6",name:"Hammer curl",detail:"",sets:4,uni:false,reps:"12–20",mode:"reps",min:[25,28],bands:true},
-    {id:"mon7",name:"Wrist flexion & extension",detail:"both hands together, like a barbell — pause at the top",sets:4,uni:false,reps:"12–20",mode:"reps",min:[29,32],bands:true},
+    {id:"mon7",name:"Reverse wrist curls",detail:"extension — both hands together, pause at the top",sets:4,uni:false,reps:"12–20",mode:"reps",min:[29,32],bands:true},
     {id:"mon8",name:"Wrist rotation",detail:"pronation & supination — elbow pinned to your ribs",sets:4,uni:false,dual:true,reps:"12–20",mode:"reps",min:[33,36],bands:true}
   ]},
   Tuesday:{ focus:"Lower A + Shoulders", total:36, ex:[
@@ -225,7 +237,7 @@ const PROGRAM = {
     {id:"tue6",name:"Hanging leg raise",detail:"compression driver — progress toward straight legs",sets:4,uni:false,reps:"12–20",mode:"reps",min:[33,36],note:"Variation"}
   ]},
   Thursday:{ focus:"Upper B", total:32, ex:[
-    {id:"thu1",name:"Pull-ups",detail:"assisted",sets:4,uni:false,reps:"6–12",mode:"load",min:[1,4],bands:true,weight:"Assist (kg)",bandRole:"assist"},
+    {id:"thu1",name:"Pull-ups",detail:"assisted",sets:4,uni:false,reps:"6–12",mode:"load",min:[1,4],bands:true,weight:"Vest (kg)",bandRole:"assist"},
     {id:"thu2",name:"Seated row",detail:"",sets:4,uni:false,reps:"6–12",mode:"load",min:[5,8],bands:true},
     {id:"thu3",name:"One-arm row",detail:"",sets:4,uni:true,reps:"12–20",mode:"reps",min:[9,16],bands:true},
     {id:"thu4",name:"High press-around",detail:"",sets:4,uni:true,reps:"12–20",mode:"reps",min:[17,24],bands:true},
@@ -239,9 +251,9 @@ const PROGRAM = {
     {id:"fri3",name:"Band pull-apart",detail:"",sets:4,uni:false,reps:"12–20",mode:"reps",min:[13,16],bands:true},
     {id:"fri5",name:"Shrugs",detail:"",sets:4,uni:false,reps:"12–20",mode:"reps",min:[17,20],bands:true},
     {id:"fri6",name:"Ab crunch",detail:"band from bar",sets:4,uni:false,reps:"12–20",mode:"reps",min:[21,24],bands:true},
-    {id:"fri11",name:"Wrist load progression",detail:"fingers forward on the floor — rock weight over the hands",sets:4,uni:false,reps:"8–12",mode:"load",min:[25,28],note:"Stage 1–5"},
+    {id:"fri13",name:"Pike compression lifts",detail:"seated, legs straight — hands further forward is harder",sets:4,uni:false,reps:"5–8",mode:"load",min:[25,28],handpos:true},
     {id:"fri8",name:"Gripper hold + deviation",detail:"gripper shut, fist wipes thumb-ward and pinky-ward",sets:4,uni:false,dual:true,reps:"8–12",mode:"load",min:[29,32],grippers:true,bands:true},
-    {id:"fri9",name:"Wrist flexion & extension",detail:"both hands together — pause at the end range",sets:4,uni:false,reps:"12–20",mode:"reps",min:[33,36],bands:true}
+    {id:"fri9",name:"Wrist curls",detail:"flexion — both hands together, pause at the top",sets:4,uni:false,reps:"12–20",mode:"reps",min:[33,36],bands:true}
   ]}
 };
 const DAYS=["Monday","Tuesday","Thursday","Friday"];
@@ -322,10 +334,12 @@ function fmtLoad(e,x){
   if(!e) return "–";
   if(typeof e.load==="string"&&e.load) return e.load;      // legacy entries
   const bits=[];
+  if(e.handpos&&e.handpos.length) bits.push("hands "+e.handpos.map(p=>{const o=HP_BY_ID[p];if(!o)return p;
+    return o.id==="hip"?"by hip":"at "+o.label.toLowerCase();}).join(" → "));
   if(e.grippers&&e.grippers.length) bits.push(e.grippers.map(g=>GRIP_BY_ID[g]?GRIP_BY_ID[g].label:g).join(" + ")+" gripper");
   if(e.bandSets){ const s=summarizeBandSets(e.bandSets); if(s) bits.push(s+(x&&x.bandRole==="assist"?" assist":"")); }
   if(e.bands&&e.bands.length) bits.push(bandNames(e.bands)+(x&&x.bandRole==="assist"?" assist":""));
-  if(e.weight!=null) bits.push(e.weight+" kg"+(x&&x.bandRole==="assist"?" assist":""));
+  if(e.weight!=null) bits.push(e.weight+" kg vest");
   if(e.note) bits.push(e.note);
   return bits.length?bits.join(" · "):"–";
 }
@@ -440,7 +454,7 @@ function collectDay(day,keepEmpty){
     if(x.note){const n=$(`#nt-${x.id}`); const t=n?n.value.trim():""; if(t)e.note=t;}
     const grab=k=>{const a=[];for(let i=0;i<x.sets;i++){const v=$(`#rp-${x.id}-${k}-${i}`);a.push(v&&v.value!==""?num(v.value):null);}return a;};
     if(x.uni||x.dual){e.right=grab("right");e.left=grab("left");} else e.both=grab("both");
-    const filled=[].concat(e.right||[],e.left||[],e.both||[]).some(z=>z!=null)||e.bands||e.bandSets||e.grippers||e.weight!=null||e.note;
+    const filled=[].concat(e.right||[],e.left||[],e.both||[]).some(z=>z!=null)||e.bands||e.bandSets||e.grippers||e.handpos||e.weight!=null||e.note;
     if(filled){entries[x.id]=e;any=true;} else if(keepEmpty){entries[x.id]=e;}
   });
   return {entries,any};
@@ -509,6 +523,8 @@ function renderDay(day){
       : "No history yet — this one sets the baseline."));
 
     // ---- load controls ----
+    if(x.handpos) card.appendChild(chipGroup(x,"handpos",HANDPOS,"Hand placement",
+      de&&de.handpos?de.handpos:(L&&L.e.handpos?L.e.handpos:[])));
     if(x.grippers) card.appendChild(chipGroup(x,"grippers",GRIPPERS,"Gripper",
       de&&de.grippers?de.grippers:(L&&L.e.grippers?L.e.grippers:[])));
     if(x.bands) card.appendChild(el("p","ex-sub",
@@ -552,7 +568,7 @@ function renderDay(day){
       sel[key]=new Set(pre);
       const dots=el("div","dots");
       BANDS.forEach(b=>{
-        const d=el("button","dot"); d.type="button";
+        const d=el("button","dot"+(b.short?" short":"")); d.type="button";
         d.style.setProperty("--c",b.c);
         d.dataset.k=key; d.dataset.b=b.id; d.title=b.label;
         d.setAttribute("aria-label",`${b.label}, set ${i+1}`);
@@ -670,7 +686,8 @@ function renderDay(day){
   // band legend
   const lg=el("div","legend");
   lg.appendChild(el("span",null,"<b style='color:var(--steel);font-weight:500'>Bands, lightest to heaviest:</b>"));
-  BANDS.forEach(b=>lg.appendChild(el("span",null,`<i style="background:${b.c}"></i>${b.label}`)));
+  BANDS.forEach(b=>lg.appendChild(el("span",null,
+    `<i style="background:${b.c}${b.short?";box-shadow:inset 0 0 0 3px rgba(12,17,24,.62)":""}"></i>${b.label}`)));
   v.appendChild(lg);
 }
 
