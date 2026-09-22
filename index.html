@@ -211,6 +211,15 @@ const HANDPOS = [
   {id:"shin",  label:"Shin",     hint:"hardest", c:"#26405f", ci:"#eef4fb"}
 ];
 const HP_BY_ID = Object.fromEntries(HANDPOS.map(p=>[p.id,p]));
+function VAR(){
+  const L=[].slice.call(arguments);
+  const C=["#7fa3c4","#5c85ae","#436a92","#2e5279","#1f3c5c"];
+  return L.map((lab,i)=>({
+    id:"v"+(i+1), label:lab,
+    hint:i===0?"easiest":(i===L.length-1?"hardest":""),
+    c:C[Math.min(i,C.length-1)], ci:i===0?"#0d1620":"#eef4fb"
+  }));
+}
 const bandNames = ids => (ids||[]).map(i=>BAND_BY_ID[i]?BAND_BY_ID[i].label:i).join(" + ");
 
 /* ============================================================
@@ -236,6 +245,16 @@ const PROGRAM = {
     {id:"tue5",name:"Lateral raise",detail:"stay light",sets:4,uni:true,reps:"12–20",mode:"reps",min:[25,32],bands:true},
     {id:"tue6",name:"Hanging leg raise",detail:"compression driver — progress toward straight legs",sets:4,uni:false,reps:"12–20",mode:"reps",min:[33,36],note:"Variation"}
   ]},
+  Wednesday:{ focus:"Pike compression & flexibility", total:36, ex:[
+    {id:"wed1",name:"Seated good morning",detail:"hinge with a flat back — hold the last rep 10–20 sec",sets:4,uni:false,reps:"8–12",mode:"reps",min:[1,4],note:"Setup notes"},
+    {id:"wed2",name:"One-leg pike",detail:"hold the last rep 10–20 sec",sets:4,uni:true,reps:"8–12",mode:"reps",min:[5,12]},
+    {id:"wed3",name:"Calf stretch",detail:"log breaths, not reps",sets:2,uni:true,reps:"10–20 breaths",mode:"reps",min:[13,16]},
+    {id:"wed4",name:"Seated Jefferson curls",detail:"weight at the neck, roll down to the legs, pause at the bottom",sets:4,uni:false,reps:"8–12",mode:"load",min:[17,20],weight:"Load (kg)",variations:VAR("Feet inclined","Feet flat")},
+    {id:"wed5",name:"Pancake compression",detail:"hold the last rep 10–20 sec",sets:4,uni:false,reps:"8–12",mode:"load",min:[21,24],variations:VAR("Blocks high","Blocks low","To the floor")},
+    {id:"wed6",name:"Hanging leg raise — isometric",detail:"sub-maximal holds to 90°, never to failure",sets:4,uni:false,reps:"10–30 sec",mode:"load",min:[25,28],variations:VAR("Bent","One leg switching","Two legs static")},
+    {id:"wed7",name:"Pike compressions",detail:"hold each rep 3–5 sec · circles: 5 in, 5 out",sets:4,uni:false,reps:"5–10",mode:"load",min:[29,32],variations:VAR("One leg","Both legs","Straddle","Straddle circles")},
+    {id:"wed8",name:"L-sit",detail:"hold, form over duration",sets:4,uni:false,reps:"10–30 sec",mode:"load",min:[33,36],variations:VAR("Bent leg, dip station","One leg straight","Full, dip station","On yoga blocks","On the ground")}
+  ]},
   Thursday:{ focus:"Upper B", total:32, ex:[
     {id:"thu1",name:"Pull-ups",detail:"assisted",sets:4,uni:false,reps:"6–12",mode:"load",min:[1,4],bands:true,weight:"Vest (kg)",bandRole:"assist"},
     {id:"thu2",name:"Seated row",detail:"",sets:4,uni:false,reps:"6–12",mode:"load",min:[5,8],bands:true},
@@ -256,8 +275,8 @@ const PROGRAM = {
     {id:"fri9",name:"Wrist curls",detail:"flexion — both hands together, pause at the top",sets:4,uni:false,reps:"12–20",mode:"reps",min:[33,36],bands:true}
   ]}
 };
-const DAYS=["Monday","Tuesday","Thursday","Friday"];
-const TABS=[...DAYS,"Mobility","Body","Data"];
+const DAYS=["Monday","Tuesday","Wednesday","Thursday","Friday"];
+const TABS=[...DAYS,"Assess","Body","Data"];
 
 /* ============================================================
    STORAGE
@@ -334,12 +353,14 @@ function fmtLoad(e,x){
   if(!e) return "–";
   if(typeof e.load==="string"&&e.load) return e.load;      // legacy entries
   const bits=[];
+  if(e.variation&&e.variation.length&&x&&x.variations)
+    bits.push(e.variation.map(v=>{const o=x.variations.find(z=>z.id===v);return o?o.label:v;}).join(" / "));
   if(e.handpos&&e.handpos.length) bits.push("hands "+e.handpos.map(p=>{const o=HP_BY_ID[p];if(!o)return p;
     return o.id==="hip"?"by hip":"at "+o.label.toLowerCase();}).join(" → "));
   if(e.grippers&&e.grippers.length) bits.push(e.grippers.map(g=>GRIP_BY_ID[g]?GRIP_BY_ID[g].label:g).join(" + ")+" gripper");
   if(e.bandSets){ const s=summarizeBandSets(e.bandSets); if(s) bits.push(s+(x&&x.bandRole==="assist"?" assist":"")); }
   if(e.bands&&e.bands.length) bits.push(bandNames(e.bands)+(x&&x.bandRole==="assist"?" assist":""));
-  if(e.weight!=null) bits.push(e.weight+" kg vest");
+  if(e.weight!=null) bits.push(e.weight+" kg"+(x&&x.weight&&/vest/i.test(x.weight)?" vest":""));
   if(e.note) bits.push(e.note);
   return bits.length?bits.join(" · "):"–";
 }
@@ -347,7 +368,7 @@ function fmtSets(e){
   if(!e) return "";
   if(e.right||e.left){
     const r=(e.right||[]).filter(v=>v!=null).join("/"),l=(e.left||[]).filter(v=>v!=null).join("/");
-    return `R ${r||"–"} · L ${l||"–"}`;
+    return `L ${l||"–"} · R ${r||"–"}`;
   }
   return (e.both||[]).filter(v=>v!=null).join(" / ")||"–";
 }
@@ -371,7 +392,7 @@ function dateRow(inputId,label){
    TABS
    ============================================================ */
 const wd=new Date().toLocaleDateString("en-US",{weekday:"long"});
-const NEXT_DAY={Wednesday:"Thursday",Saturday:"Monday",Sunday:"Monday"};
+const NEXT_DAY={Saturday:"Monday",Sunday:"Monday"};
 let active=DAYS.includes(wd)?wd:(NEXT_DAY[wd]||"Monday");
 
 function renderTabs(){
@@ -436,7 +457,7 @@ function collectDay(day,keepEmpty){
   PROGRAM[day].ex.forEach(x=>{
     const e={};
     if(x.bands){
-      const keys=x.uni?["right","left"]:["both"];
+      const keys=["both"];
       const bs={}; let anyBand=false;
       keys.forEach(k=>{
         bs[k]=[];
@@ -454,7 +475,7 @@ function collectDay(day,keepEmpty){
     if(x.note){const n=$(`#nt-${x.id}`); const t=n?n.value.trim():""; if(t)e.note=t;}
     const grab=k=>{const a=[];for(let i=0;i<x.sets;i++){const v=$(`#rp-${x.id}-${k}-${i}`);a.push(v&&v.value!==""?num(v.value):null);}return a;};
     if(x.uni||x.dual){e.right=grab("right");e.left=grab("left");} else e.both=grab("both");
-    const filled=[].concat(e.right||[],e.left||[],e.both||[]).some(z=>z!=null)||e.bands||e.bandSets||e.grippers||e.handpos||e.weight!=null||e.note;
+    const filled=[].concat(e.right||[],e.left||[],e.both||[]).some(z=>z!=null)||e.bands||e.bandSets||e.grippers||e.handpos||e.variation||e.weight!=null||e.note;
     if(filled){entries[x.id]=e;any=true;} else if(keepEmpty){entries[x.id]=e;}
   });
   return {entries,any};
@@ -508,7 +529,8 @@ function renderDay(day){
     const bits=[];
     if(x.detail) bits.push(esc(x.detail));
     bits.push(`target <b>${x.reps}</b> reps`);
-    bits.push(x.uni?"4 right + 4 left":(x.dual?"4 sets · both sides in the minute":"4 sets"));
+    bits.push(x.uni?`${x.sets} each side · alternating left, right, left, right`
+      :(x.dual?`${x.sets} sets · both sides in the minute`:`${x.sets} sets`));
     card.appendChild(el("p","ex-sub",bits.join(" · ")));
 
     const lad=el("div","ladder");
@@ -523,6 +545,8 @@ function renderDay(day){
       : "No history yet — this one sets the baseline."));
 
     // ---- load controls ----
+    if(x.variations) card.appendChild(chipGroup(x,"variation",x.variations,"Variation",
+      de&&de.variation?de.variation:(L&&L.e.variation?L.e.variation:[])));
     if(x.handpos) card.appendChild(chipGroup(x,"handpos",HANDPOS,"Hand placement",
       de&&de.handpos?de.handpos:(L&&L.e.handpos?L.e.handpos:[])));
     if(x.grippers) card.appendChild(chipGroup(x,"grippers",GRIPPERS,"Gripper",
@@ -600,28 +624,26 @@ function renderDay(day){
       return box;
     };
 
-    if(x.dual){
-      // both sides inside the same minute — right and left side by side
+    if(x.dual||x.uni){
+      // paired sides — dual shares a minute, uni alternates minute by minute
       const box=el("div","side");
       const cols=x.bands?"18px 46px 46px 1fr":"18px 1fr 1fr";
+      const legs=/Pistol|squat/i.test(x.name);
       const hdr=el("div","prow phdr"); hdr.style.gridTemplateColumns=cols;
       hdr.appendChild(el("span","setno",""));
-      hdr.appendChild(el("span","hl",x.name.indexOf("Pistol")===0?"L leg":"R"));
-      hdr.appendChild(el("span","hl",x.name.indexOf("Pistol")===0?"R leg":"L"));
+      hdr.appendChild(el("span","hl",legs?"L leg":"L"));
+      hdr.appendChild(el("span","hl",legs?"R leg":"R"));
       if(x.bands) hdr.appendChild(el("span","hl","Band"));
       box.appendChild(hdr);
       for(let i=0;i<x.sets;i++){
         const row=el("div","prow"); row.style.gridTemplateColumns=cols;
         row.appendChild(el("span","setno",String(i+1)));
-        row.appendChild(mkRepInput("right",i));
         row.appendChild(mkRepInput("left",i));
+        row.appendChild(mkRepInput("right",i));
         if(x.bands) row.appendChild(mkDots("both",i));
         box.appendChild(row);
       }
       card.appendChild(box);
-    } else if(x.uni){
-      card.appendChild(plainRows("right","Right"));
-      card.appendChild(plainRows("left","Left"));
     } else {
       card.appendChild(plainRows("both","Reps per set"));
     }
@@ -630,8 +652,8 @@ function renderDay(day){
       const cp=el("button","btn ghost sm","Copy set 1 bands to all");
       cp.style.marginTop="4px";
       cp.onclick=()=>{
-        const keys=x.uni?["right","left"]:["both"];
-        const src=new Set(sel[`${x.id}|bs|${keys[0]}|0`]||[]);
+        const keys=["both"];
+        const src=new Set(sel[`${x.id}|bs|both|0`]||[]);
         keys.forEach(k=>{
           for(let i=0;i<x.sets;i++){
             const key=`${x.id}|bs|${k}|${i}`;
@@ -718,10 +740,10 @@ const MOB=[
 function renderMobility(){
   const v=$("#view"); v.innerHTML="";
   const head=el("div","phead");
-  head.appendChild(el("h2",null,"Mobility"));
-  head.appendChild(el("span","meta","Paused — kept here for when you pick it up"));
+  head.appendChild(el("h2",null,"Assessment"));
+  head.appendChild(el("span","meta","Measure every 6–8 weeks, not weekly"));
   v.appendChild(head);
-  v.appendChild(el("p","note","The Wednesday session is on hold. Wrist strength work now lives on Friday, and the hanging leg raise carries your pike compression. Numbers from your own assessment photos. Only re-measure every six to eight weeks — week-to-week noise will just mislead you."));
+  v.appendChild(el("p","note","Numbers from your own assessment photos. Only re-measure every six to eight weeks — week-to-week noise will just mislead you."));
 
   const card=el("div","card"); card.style.marginTop="14px";
   card.appendChild(dateRow("mobDate"));
@@ -924,7 +946,7 @@ async function importJSON(){
    ============================================================ */
 function render(){
   if(DAYS.includes(active)) renderDay(active);
-  else if(active==="Mobility") renderMobility();
+  else if(active==="Assess") renderMobility();
   else if(active==="Body") renderBody();
   else renderData();
 }
