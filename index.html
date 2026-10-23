@@ -227,15 +227,15 @@ const bandNames = ids => (ids||[]).map(i=>BAND_BY_ID[i]?BAND_BY_ID[i].label:i).j
    bands:true → chips · weight:"label" → kg field · note:"label" → text field
    ============================================================ */
 const PROGRAM = {
-  Monday:{ focus:"Upper A + Wrists", total:36, ex:[
+  Monday:{ focus:"Upper A + Wrists", total:32, ex:[
     {id:"mon1",name:"Weighted dips",detail:"vest",sets:4,uni:false,reps:"6–12",mode:"load",min:[1,4],weight:"Vest (kg)"},
     {id:"mon2",name:"Ring inverted row",detail:"feet elevated",sets:4,uni:false,reps:"6–12",mode:"load",min:[5,8],weight:"Vest (kg)",note:"Feet height"},
     {id:"mon3",name:"Lat prayer",detail:"",sets:4,uni:false,reps:"12–20",mode:"reps",min:[9,12],bands:true},
-    {id:"mon4",name:"Low press-around",detail:"",sets:4,uni:true,reps:"12–20",mode:"reps",min:[13,20],bands:true},
-    {id:"mon5",name:"Ring triceps extension",detail:"impossible dip progression",sets:4,uni:false,reps:"12–20",mode:"reps",min:[21,24],note:"Ring height / body angle"},
-    {id:"mon6",name:"Hammer curl",detail:"",sets:4,uni:false,reps:"12–20",mode:"reps",min:[25,28],bands:true},
-    {id:"mon7",name:"Reverse wrist curls",detail:"extension — both hands together, pause at the top",sets:4,uni:false,reps:"12–20",mode:"reps",min:[29,32],bands:true},
-    {id:"mon8",name:"Wrist rotation",detail:"pronation & supination — elbow pinned to your ribs",sets:4,uni:false,dual:true,reps:"12–20",mode:"reps",min:[33,36],bands:true}
+    {id:"mon9",name:"Pseudo planche push-up",detail:"hands low by the hips, shoulders travelling forward over the hands",sets:4,uni:false,reps:"6–12",mode:"load",min:[13,16],note:"Hand position / lean",weight:"Vest (kg)"},
+    {id:"mon5",name:"Ring triceps extension",detail:"impossible dip progression",sets:4,uni:false,reps:"12–20",mode:"reps",min:[17,20],note:"Ring height / body angle"},
+    {id:"mon10",name:"Ring curl — neutral grip",detail:"rings low, body angled back — walk the feet forward to make it harder",sets:4,uni:false,reps:"6–12",mode:"load",min:[21,24],note:"Body angle / foot position",weight:"Vest (kg)"},
+    {id:"mon7",name:"Reverse wrist curls",detail:"extension — rod in both hands, band under the feet. Pause at the top",sets:4,uni:false,reps:"12–20",mode:"reps",min:[25,28],bands:true},
+    {id:"mon8",name:"Mallet levering — rotation",detail:"3 kg mallet, forearm braced, elbow at the ribs. Slide the hand away from the head to progress",sets:4,uni:false,dual:true,reps:"8–12",mode:"load",min:[29,32],note:"Grip distance from head (cm)"}
   ]},
   Tuesday:{ focus:"Lower A + Shoulders", total:36, ex:[
     {id:"tue1",name:"Bulgarian split squat",detail:"",sets:4,uni:true,reps:"6–12",mode:"load",min:[1,8],bands:true,weight:"Vest (kg)"},
@@ -252,16 +252,16 @@ const PROGRAM = {
     {id:"wed4",name:"Seated Jefferson curls",detail:"weight at the neck, roll down to the legs, pause at the bottom",sets:4,uni:false,reps:"8–12",mode:"load",min:[17,20],weight:"Load (kg)",variations:VAR("Feet inclined","Feet flat")},
     {id:"wed5",name:"Pancake compression",detail:"hold the last rep 10–20 sec",sets:4,uni:false,reps:"8–12",mode:"load",min:[21,24],variations:VAR("Blocks high","Blocks low","To the floor")},
     {id:"wed6",name:"Hanging leg raise — isometric",detail:"sub-maximal holds to 90°, never to failure",sets:4,uni:false,reps:"10–30 sec",mode:"load",min:[25,28],variations:VAR("Bent","One leg switching","Two legs static")},
-    {id:"wed7",name:"Pike compressions",detail:"hold each rep 3–5 sec · circles: 5 in, 5 out",sets:4,uni:false,reps:"5–10",mode:"load",min:[29,32],variations:VAR("One leg","Both legs","Straddle","Straddle circles")},
+    {id:"wed7",name:"Pike compressions",detail:"hold each rep 3–5 sec · circles: 5 in, 5 out",sets:4,uni:false,reps:"5–10",mode:"load",min:[29,32],variations:VAR("One leg","Both legs","Straddle","Straddle circles"),handpos:true,weight:"Ankle weights (kg)"},
     {id:"wed8",name:"L-sit",detail:"hold, form over duration",sets:4,uni:false,reps:"10–30 sec",mode:"load",min:[33,36],variations:VAR("Bent leg, dip station","One leg straight","Full, dip station","On yoga blocks","On the ground")}
   ]},
-  Thursday:{ focus:"Upper B", total:32, ex:[
+  Thursday:{ focus:"Upper B", total:28, ex:[
     {id:"thu1",name:"Pull-ups",detail:"assisted",sets:4,uni:false,reps:"6–12",mode:"load",min:[1,4],bands:true,weight:"Vest (kg)",bandRole:"assist"},
     {id:"thu2",name:"Seated row",detail:"",sets:4,uni:false,reps:"6–12",mode:"load",min:[5,8],bands:true},
     {id:"thu3",name:"One-arm row",detail:"",sets:4,uni:true,reps:"12–20",mode:"reps",min:[9,16],bands:true},
-    {id:"thu4",name:"High press-around",detail:"",sets:4,uni:true,reps:"12–20",mode:"reps",min:[17,24],bands:true},
-    {id:"thu5",name:"Biceps curl",detail:"",sets:4,uni:false,reps:"12–20",mode:"reps",min:[25,28],bands:true},
-    {id:"thu6",name:"Triceps pushdown",detail:"",sets:4,uni:false,reps:"12–20",mode:"reps",min:[29,32],bands:true}
+    {id:"thu7",name:"Ring face pull",detail:"rings low, pull to the forehead, elbows high and wide",sets:4,uni:false,reps:"10–15",mode:"load",min:[17,20],note:"Body angle"},
+    {id:"thu8",name:"Ring curl — supinated",detail:"palms up, rings low, body angled back",sets:4,uni:false,reps:"6–12",mode:"load",min:[21,24],note:"Body angle / foot position",weight:"Vest (kg)"},
+    {id:"thu9",name:"Diamond push-up",detail:"hands together under the chest",sets:4,uni:false,reps:"6–12",mode:"load",min:[25,28],note:"Feet height",weight:"Vest (kg)"}
   ]},
   Friday:{ focus:"Lower B + Shoulders + Wrists", total:36, ex:[
     {id:"fri12",name:"Pistol squat",detail:"ring-assisted → box → heel-elevated → full → weighted",sets:4,uni:false,dual:true,reps:"5–8",mode:"load",min:[1,4],note:"Stage 1–5 / ring assistance",weight:"Vest (kg)"},
@@ -270,9 +270,9 @@ const PROGRAM = {
     {id:"fri3",name:"Band pull-apart",detail:"",sets:4,uni:false,reps:"12–20",mode:"reps",min:[13,16],bands:true},
     {id:"fri5",name:"Shrugs",detail:"",sets:4,uni:false,reps:"12–20",mode:"reps",min:[17,20],bands:true},
     {id:"fri6",name:"Ab crunch",detail:"band from bar",sets:4,uni:false,reps:"12–20",mode:"reps",min:[21,24],bands:true},
-    {id:"fri13",name:"Pike compression lifts",detail:"seated, legs straight — hands further forward is harder",sets:4,uni:false,reps:"5–8",mode:"load",min:[25,28],handpos:true},
+    {id:"fri13",name:"Pike compressions",detail:"seated, legs straight — hold each rep 3–5 sec",sets:4,uni:false,reps:"5–10",mode:"load",min:[25,28],variations:VAR("One leg","Both legs","Straddle","Straddle circles"),handpos:true,weight:"Ankle weights (kg)"},
     {id:"fri8",name:"Gripper hold + deviation",detail:"gripper shut, fist wipes thumb-ward and pinky-ward",sets:4,uni:false,dual:true,reps:"8–12",mode:"load",min:[29,32],grippers:true,bands:true},
-    {id:"fri9",name:"Wrist curls",detail:"flexion — both hands together, pause at the top",sets:4,uni:false,reps:"12–20",mode:"reps",min:[33,36],bands:true}
+    {id:"fri9",name:"Wrist curls",detail:"flexion — rod in both hands, band under the feet. Pause at the top",sets:4,uni:false,reps:"12–20",mode:"reps",min:[33,36],bands:true}
   ]}
 };
 const DAYS=["Monday","Tuesday","Wednesday","Thursday","Friday"];
