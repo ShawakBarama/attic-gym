@@ -239,9 +239,9 @@ const PROGRAM = {
   ]},
   Tuesday:{ focus:"Lower A + Shoulders", total:32, ex:[
     {id:"tue1",name:"Bulgarian split squat",detail:"",sets:4,uni:true,reps:"6–12",mode:"load",min:[1,8],bands:true,weight:"Vest (kg)"},
-    {id:"tue2",name:"Nordic curl",detail:"progress by leverage",sets:4,uni:false,reps:"6–12",mode:"load",min:[9,12],note:"Lever / assistance"},
+    {id:"tue2",name:"Nordic curl",detail:"band assists — reduce the tier as you get stronger",sets:4,uni:false,reps:"6–12",mode:"load",min:[9,12],bands:true,bandRole:"assist",bandList:["yellow","light-red","heavy-red"],note:"Lever / setup"},
     {id:"tue8",name:"Pike push-up",detail:"handstand push-up progression — band assists if needed",sets:4,uni:false,reps:"6–12",mode:"load",min:[13,16],bands:true,bandRole:"assist",note:"Feet height / parallettes"},
-    {id:"tue3",name:"High row",detail:"",sets:4,uni:false,reps:"12–20",mode:"reps",min:[17,20],bands:true},
+    {id:"tue3",name:"High ring row",detail:"pull to the upper chest, elbows high and wide",sets:4,uni:false,reps:"8–15",mode:"load",min:[17,20],note:"Body angle / feet height",weight:"Vest (kg)"},
     {id:"tue5",name:"Lateral raise",detail:"stay light",sets:4,uni:true,reps:"12–20",mode:"reps",min:[21,28],bands:true},
     {id:"tue6",name:"Hanging leg raise",detail:"compression driver — progress toward straight legs",sets:4,uni:false,reps:"12–20",mode:"reps",min:[29,32],note:"Variation"}
   ]},
@@ -271,7 +271,7 @@ const PROGRAM = {
     {id:"fri5",name:"Shrugs",detail:"",sets:4,uni:false,reps:"12–20",mode:"reps",min:[17,20],bands:true},
     {id:"fri6",name:"Ab crunch",detail:"band from bar",sets:4,uni:false,reps:"12–20",mode:"reps",min:[21,24],bands:true},
     {id:"fri13",name:"Pike compressions",detail:"seated, legs straight — hold each rep 3–5 sec",sets:4,uni:false,reps:"5–10",mode:"load",min:[25,28],variations:VAR("One leg","Both legs","Straddle","Straddle circles"),handpos:true,weight:"Ankle weights (kg)"},
-    {id:"fri8",name:"Gripper hold + deviation",detail:"gripper shut, fist wipes thumb-ward and pinky-ward",sets:4,uni:false,dual:true,reps:"8–12",mode:"load",min:[29,32],grippers:true,bands:true},
+    {id:"fri8",name:"Mallet levering — deviation",detail:"side lever — radial and ulnar. Forearm braced, elbow at the ribs, knee quiet",sets:4,uni:false,dual:true,reps:"8–12",mode:"load",min:[29,32],note:"Grip distance from head (cm)"},
     {id:"fri9",name:"Wrist curls",detail:"flexion — rod in both hands, band under the feet. Pause at the top",sets:4,uni:false,reps:"12–20",mode:"reps",min:[33,36],bands:true}
   ]}
 };
@@ -585,13 +585,14 @@ function renderDay(day){
       inp.oninput=markDirty;
       return inp;
     };
+    const bandOpts = x.bandList ? BANDS.filter(b=>x.bandList.indexOf(b.id)>=0) : BANDS;
     const mkDots=(k,i)=>{
       const key=`${x.id}|bs|${k}|${i}`;
       const pre=(de&&de.bandSets&&de.bandSets[k]&&de.bandSets[k][i])
              || (L&&L.e.bandSets&&L.e.bandSets[k]&&L.e.bandSets[k][i]) || [];
       sel[key]=new Set(pre);
       const dots=el("div","dots");
-      BANDS.forEach(b=>{
+      bandOpts.forEach(b=>{
         const d=el("button","dot"+(b.short?" short":"")); d.type="button";
         d.style.setProperty("--c",b.c);
         d.dataset.k=key; d.dataset.b=b.id; d.title=b.label;
