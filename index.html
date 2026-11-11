@@ -245,15 +245,14 @@ const PROGRAM = {
     {id:"tue5",name:"Lateral raise",detail:"stay light",sets:4,uni:true,reps:"12–20",mode:"reps",min:[21,28],bands:true},
     {id:"tue6",name:"Hanging leg raise",detail:"compression driver — progress toward straight legs",sets:4,uni:false,reps:"12–20",mode:"reps",min:[29,32],note:"Variation"}
   ]},
-  Wednesday:{ focus:"Pike compression & flexibility", total:36, ex:[
+  Wednesday:{ focus:"Pike compression & flexibility", total:32, ex:[
     {id:"wed1",name:"Seated good morning",detail:"hinge with a flat back — hold the last rep 10–20 sec",sets:4,uni:false,reps:"8–12",mode:"reps",min:[1,4],note:"Setup notes"},
-    {id:"wed2",name:"One-leg pike",detail:"hold the last rep 10–20 sec",sets:4,uni:true,reps:"8–12",mode:"reps",min:[5,12]},
-    {id:"wed3",name:"Calf stretch",detail:"log breaths, not reps",sets:2,uni:true,reps:"10–20 breaths",mode:"reps",min:[13,16]},
-    {id:"wed4",name:"Seated Jefferson curls",detail:"weight at the neck, roll down to the legs, pause at the bottom",sets:4,uni:false,reps:"8–12",mode:"load",min:[17,20],weight:"Load (kg)",variations:VAR("Feet inclined","Feet flat")},
-    {id:"wed5",name:"Pancake compression",detail:"hold the last rep 10–20 sec",sets:4,uni:false,reps:"8–12",mode:"load",min:[21,24],variations:VAR("Blocks high","Blocks low","To the floor")},
-    {id:"wed6",name:"Hanging leg raise — isometric",detail:"sub-maximal holds to 90°, never to failure",sets:4,uni:false,reps:"10–30 sec",mode:"load",min:[25,28],variations:VAR("Bent","One leg switching","Two legs static")},
-    {id:"wed7",name:"Pike compressions",detail:"hold each rep 3–5 sec · circles: 5 in, 5 out",sets:4,uni:false,reps:"5–10",mode:"load",min:[29,32],variations:VAR("One leg","Both legs","Straddle","Straddle circles"),handpos:true,weight:"Ankle weights (kg)"},
-    {id:"wed8",name:"L-sit",detail:"hold, form over duration",sets:4,uni:false,reps:"10–30 sec",mode:"load",min:[33,36],variations:VAR("Bent leg, dip station","One leg straight","Full, dip station","On yoga blocks","On the ground")}
+    {id:"wed9",name:"Horse stance",detail:"knees and toes forward, sink down — adductor width",sets:4,uni:false,reps:"15–30 sec",mode:"load",min:[5,8],note:"Stance width / depth"},
+    {id:"wed4",name:"Seated Jefferson curls",detail:"weight at the neck, roll down to the legs, pause at the bottom",sets:4,uni:false,reps:"8–12",mode:"load",min:[9,12],weight:"Load (kg)",variations:VAR("Feet inclined","Feet flat")},
+    {id:"wed5",name:"Pancake compression",detail:"hold the last rep 10–20 sec",sets:4,uni:false,reps:"8–12",mode:"load",min:[13,16],variations:VAR("Blocks high","Blocks low","To the floor")},
+    {id:"wed10",name:"90-90 leg lifts",detail:"front leg external, back leg internal — both rotations in one setup",sets:4,uni:true,reps:"8–12",mode:"load",min:[17,24],variations:VAR("Leaning back","Hands on the floor","Upright","Hands overhead")},
+    {id:"wed7",name:"Pike compressions",detail:"hold each rep 3–5 sec · circles: 5 in, 5 out",sets:4,uni:false,reps:"5–10",mode:"load",min:[25,28],variations:VAR("One leg","Both legs","Straddle","Straddle circles"),handpos:true,weight:"Ankle weights (kg)"},
+    {id:"wed8",name:"L-sit",detail:"hold, form over duration",sets:4,uni:false,reps:"10–30 sec",mode:"load",min:[29,32],variations:VAR("Bent leg, dip station","One leg straight","Full, dip station","On yoga blocks","On the ground")}
   ]},
   Thursday:{ focus:"Upper B", total:28, ex:[
     {id:"thu1",name:"Pull-ups",detail:"assisted",sets:4,uni:false,reps:"6–12",mode:"load",min:[1,4],bands:true,weight:"Vest (kg)",bandRole:"assist"},
@@ -733,6 +732,12 @@ const MOB=[
   {id:"pikeReach",label:"Reach",unit:"shins / ankles / toes / past",ph:"ankles",text:true},
   {id:"pikeGap",label:"Active compression gap",unit:"cm chest to thigh",ph:"12"},
   {id:"pikeLimit",label:"Weak link",unit:"hamstrings or spinal flexion",ph:"hamstrings",text:true},
+  {id:"hipIntR",label:"Hip internal rot — right",unit:"degrees",ph:"25"},
+  {id:"hipIntL",label:"Hip internal rot — left",unit:"degrees",ph:"25"},
+  {id:"hipExtR",label:"Hip external rot — right",unit:"degrees",ph:"40"},
+  {id:"hipExtL",label:"Hip external rot — left",unit:"degrees",ph:"40"},
+  {id:"straddle",label:"Straddle angle",unit:"degrees between legs",ph:"90"},
+  {id:"pancakeFold",label:"Pancake fold",unit:"degrees, flat back",ph:"60"},
   {id:"wristExtR",label:"Wrist extension — right",unit:"degrees",ph:"70"},
   {id:"wristExtL",label:"Wrist extension — left",unit:"degrees",ph:"72"},
   {id:"wristFlexR",label:"Wrist flexion — right",unit:"degrees",ph:""},
